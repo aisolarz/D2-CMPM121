@@ -42,4 +42,8 @@ canvas.addEventListener("pointerleave", () => {
   cursor.isDrawing = false;
 });
 
+canvas.addEventListener("pointercancel", () => {
+  cursor.isDrawing = false;
+});
+
 app.append(heading, message, canvas);
