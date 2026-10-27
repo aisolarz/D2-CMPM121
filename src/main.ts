@@ -46,4 +46,50 @@ canvas.addEventListener("pointercancel", () => {
   cursor.isDrawing = false;
 });
 
+//step 2: document data
+type Point = { x: number; y: number };
+type Stroke = { points: Point[]; lineWidth: number };
+
+//all of the finishes strokes in order they were drawn
+const strokes: Stroke[] = [];
+//current stroke (duh) but its null when nothing is being drawn
+let currentStroke: Stroke | null = null;
+
+function finishStroke() {
+  //only keeps the strokes that have min 2 points
+  if (currentStroke != null && currentStroke.points.length >= 2) {
+    strokes.push(currentStroke);
+  }
+  currentStroke = null;
+}
+
+function cancelStroke() {
+  currentStroke = null;
+}
+
+canvas.addEventListener("pointerdown", (event) => {
+  currentStroke = {
+    points: [{ x: event.offsetX, y: event.offsetY }],
+    lineWidth: 1,
+  };
+});
+
+canvas.addEventListener("pointermove", (event) => {
+  if (currentStroke != null) {
+    currentStroke.points.push({ x: event.offsetX, y: event.offsetY });
+  }
+});
+
+canvas.addEventListener("pointerup", () => {
+  finishStroke();
+});
+
+canvas.addEventListener("pointerleave", () => {
+  finishStroke();
+});
+
+canvas.addEventListener("pointercancel", () => {
+  cancelStroke();
+});
+
 app.append(heading, message, canvas);
