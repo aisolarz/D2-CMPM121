@@ -12,40 +12,9 @@ canvas.width = 500;
 canvas.height = 500;
 canvas.style.border = "1px solid black";
 
-const cursor = { isDrawing: false, x: 0, y: 0 };
-
 const ctx = canvas.getContext("2d");
 
 // ============ Canvas Event Listeners =========
-canvas.addEventListener("pointerdown", (event) => {
-  cursor.isDrawing = true;
-  cursor.x = event.offsetX;
-  cursor.y = event.offsetY;
-});
-
-canvas.addEventListener("pointermove", (event) => {
-  if (cursor.isDrawing === true && ctx != null) {
-    ctx.beginPath();
-    ctx.moveTo(cursor.x, cursor.y);
-    ctx.lineTo(event.offsetX, event.offsetY);
-    ctx.stroke();
-    cursor.x = event.offsetX;
-    cursor.y = event.offsetY;
-  }
-});
-
-canvas.addEventListener("pointerup", () => {
-  cursor.isDrawing = false;
-});
-
-canvas.addEventListener("pointerleave", () => {
-  cursor.isDrawing = false;
-});
-
-canvas.addEventListener("pointercancel", () => {
-  cursor.isDrawing = false;
-});
-
 //step 2: document data
 type Point = { x: number; y: number };
 type Stroke = { points: Point[]; lineWidth: number };
@@ -67,29 +36,57 @@ function cancelStroke() {
   currentStroke = null;
 }
 
+function redraw() {
+  if (ctx !== null) { // makes sure ctx loaded
+    ctx.clearRect(0, 0, canvas.width, canvas.height); // clears the canvas for a clean slate
+    for (const stroke of strokes) { // for each stroke
+      ctx.beginPath(); // start the path and set the thickness
+      ctx.lineWidth = stroke.lineWidth;
+      ctx.moveTo(stroke.points[0].x, stroke.points[0].y);
+      for (let i = 1; i < stroke.points.length; i++) { // where the line will be drawn
+        ctx.lineTo(stroke.points[i].x, stroke.points[i].y);
+      }
+      ctx.stroke(); // draws the line
+    }
+    if (currentStroke !== null) { // if there is a drawing occuring
+      ctx.beginPath(); // start the path and set the thickness
+      ctx.lineWidth = currentStroke.lineWidth;
+      ctx.moveTo(currentStroke.points[0].x, currentStroke.points[0].y);
+      for (let i = 1; i < currentStroke.points.length; i++) { // path for the pen
+        ctx.lineTo(currentStroke.points[i].x, currentStroke.points[i].y);
+      }
+      ctx.stroke(); // draws the line
+    }
+  }
+}
 canvas.addEventListener("pointerdown", (event) => {
   currentStroke = {
     points: [{ x: event.offsetX, y: event.offsetY }],
     lineWidth: 1,
   };
+  redraw();
 });
 
 canvas.addEventListener("pointermove", (event) => {
   if (currentStroke != null) {
     currentStroke.points.push({ x: event.offsetX, y: event.offsetY });
+    redraw();
   }
 });
 
 canvas.addEventListener("pointerup", () => {
   finishStroke();
+  redraw();
 });
 
 canvas.addEventListener("pointerleave", () => {
   finishStroke();
+  redraw();
 });
 
 canvas.addEventListener("pointercancel", () => {
   cancelStroke();
+  redraw();
 });
 
 app.append(heading, message, canvas);
