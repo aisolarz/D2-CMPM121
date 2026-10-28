@@ -46,6 +46,41 @@ function cancelStroke() {
   currentStroke = null;
 }
 
+//step 5: marker tool
+type MarkerTool = { name: string; lineWidth: number };
+
+const markerTools: MarkerTool[] = [
+  { name: "Thin", lineWidth: 1 },
+  { name: "Thick", lineWidth: 6 },
+];
+
+let selectedTool: MarkerTool = markerTools[0];
+const toolButtons: HTMLButtonElement[] = [];
+
+//make the selecte tools buttons BOLDD
+function updateToolButtons() {
+  for (let i = 0; i < markerTools.length; i++) {
+    if (markerTools[i] === selectedTool) {
+      toolButtons[i].style.fontWeight = "bold";
+    } else {
+      toolButtons[i].style.fontWeight = "normal";
+    }
+  }
+}
+
+//buillds a button for every tool in the list
+for (const tool of markerTools) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.textContent = tool.name;
+  button.addEventListener("click", () => {
+    selectedTool = tool; //only changes what it selects and not the history/document
+    updateToolButtons();
+  });
+  toolButtons.push(button);
+}
+updateToolButtons();
+
 function redraw() {
   if (ctx !== null) { // makes sure ctx loaded
     ctx.clearRect(0, 0, canvas.width, canvas.height); // clears the canvas for a clean slate
@@ -76,7 +111,7 @@ function redraw() {
 canvas.addEventListener("pointerdown", (event) => {
   currentStroke = {
     points: [{ x: event.offsetX, y: event.offsetY }],
-    lineWidth: 1,
+    lineWidth: selectedTool.lineWidth,
   };
   redraw();
 });
@@ -131,6 +166,14 @@ redrawButton.addEventListener("click", () => {
   redraw();
 });
 
-app.append(heading, message, canvas, undoButton, redoButton, redrawButton);
+app.append(
+  heading,
+  message,
+  canvas,
+  undoButton,
+  redoButton,
+  redrawButton,
+  ...toolButtons,
+);
 
 redraw(); //the starting state of the undo and redo button
