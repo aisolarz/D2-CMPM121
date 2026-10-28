@@ -33,7 +33,7 @@ type StickerPosition = { x: number; y: number };
 const stickerTools: StickerTool[] = [
   { name: "Love", emoji: "😍" },
   { name: "Laugh", emoji: "😹" },
-  { name: "Oh", emoji: "🫥" },
+  { name: "Awkward", emoji: "🫥" },
 ];
 
 const userInput = document.createElement("input"); // where user can input text for custom sticker
