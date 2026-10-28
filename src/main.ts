@@ -121,4 +121,14 @@ redoButton.addEventListener("click", () => {
   }
 });
 
-app.append(heading, message, canvas, undoButton, redoButton);
+//step 3: redraw button
+const redrawButton = document.createElement("button");
+redrawButton.textContent = "Redraw";
+redrawButton.type = "button";
+redrawButton.addEventListener("click", () => {
+  //has to clear the pixels not the strokes
+  ctx?.clearRect(0, 0, canvas.width, canvas.height);
+  redraw();
+});
+
+app.append(heading, message, canvas, undoButton, redoButton, redrawButton);
