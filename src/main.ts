@@ -132,3 +132,5 @@ redrawButton.addEventListener("click", () => {
 });
 
 app.append(heading, message, canvas, undoButton, redoButton, redrawButton);
+
+redraw(); //the starting state of the undo and redo button
