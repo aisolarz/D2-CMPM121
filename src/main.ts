@@ -22,10 +22,18 @@ undoButton.type = "button";
 const redoButton = document.createElement("button");
 redoButton.textContent = "Redo";
 redoButton.type = "button";
-// ============ Canvas Event Listeners =========
+
 //step 2: document data
 type Point = { x: number; y: number };
 type Stroke = { points: Point[]; lineWidth: number };
+
+type StickerTool = { name: string; emoji: string };
+type StickerPosition = { x: number; y: number };
+const stickerTools: StickerTool[] = [
+  { name: "Love", emoji: "😍" },
+  { name: "Laugh", emoji: "😹" },
+  { name: "Oh", emoji: "🫥" },
+];
 
 //the drawing command is anything that knows how to draw itself onto a canvas
 type DrawCommand = {
@@ -45,6 +53,16 @@ function makeStrokeCommand(stroke: Stroke): DrawCommand {
       }
       ctx.stroke();
       ctx.restore();
+    },
+  };
+}
+function makeStickerCommand(x: number, y: number, emoji: string): DrawCommand {
+  return {
+    display(ctx) {
+      ctx.font = "32px serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(emoji, x, y);
     },
   };
 }
@@ -76,13 +94,13 @@ const markerTools: MarkerTool[] = [
   { name: "Thick", lineWidth: 6 },
 ];
 
-let selectedTool: MarkerTool = markerTools[0];
+let selectedTool: MarkerTool | StickerTool = markerTools[0];
 const toolButtons: HTMLButtonElement[] = [];
 
 //make the selecte tools buttons BOLDD
 function updateToolButtons() {
-  for (let i = 0; i < markerTools.length; i++) {
-    if (markerTools[i] === selectedTool) {
+  for (let i = 0; i < toolButtons.length; i++) {
+    if (toolButtons[i].textContent.includes(selectedTool.name)) {
       toolButtons[i].style.fontWeight = "bold";
     } else {
       toolButtons[i].style.fontWeight = "normal";
@@ -103,6 +121,16 @@ for (const tool of markerTools) {
 }
 updateToolButtons();
 
+for (const sticker of stickerTools) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.textContent = sticker.emoji + sticker.name;
+  button.addEventListener("click", () => {
+    selectedTool = sticker;
+    updateToolButtons();
+  });
+  toolButtons.push(button);
+}
 function redraw() {
   if (ctx !== null) { // makes sure ctx loaded
     ctx.clearRect(0, 0, canvas.width, canvas.height); // clears the canvas for a clean slate
@@ -124,11 +152,23 @@ function redraw() {
   undoButton.disabled = strokes.length === 0;
   redoButton.disabled = redoStrokes.length === 0;
 }
+// ============ Canvas Event Listeners =========
 canvas.addEventListener("pointerdown", (event) => {
-  currentStroke = {
-    points: [{ x: event.offsetX, y: event.offsetY }],
-    lineWidth: selectedTool.lineWidth,
-  };
+  if ("lineWidth" in selectedTool) {
+    currentStroke = {
+      points: [{ x: event.offsetX, y: event.offsetY }],
+      lineWidth: selectedTool.lineWidth,
+    };
+  } else {
+    const sticker = makeStickerCommand(
+      event.offsetX,
+      event.offsetY,
+      selectedTool.emoji,
+    );
+    strokes.push(sticker);
+    redoStrokes.length = 0;
+  }
+
   redraw();
 });
 
@@ -153,6 +193,7 @@ canvas.addEventListener("pointercancel", () => {
   cancelStroke();
   redraw();
 });
+// ============== Button Event Listeners ====================
 undoButton.addEventListener("click", () => {
   if (strokes.length > 0) { // if there are stokes to undo
     const poppedStroke = strokes.pop();
