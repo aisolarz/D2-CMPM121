@@ -27,6 +27,7 @@ redoButton.type = "button";
 type Point = { x: number; y: number };
 type Stroke = { points: Point[]; lineWidth: number };
 
+// ===================== Sticker ======================
 type StickerTool = { name: string; emoji: string };
 type StickerPosition = { x: number; y: number };
 const stickerTools: StickerTool[] = [
@@ -34,6 +35,14 @@ const stickerTools: StickerTool[] = [
   { name: "Laugh", emoji: "😹" },
   { name: "Oh", emoji: "🫥" },
 ];
+
+const userInput = document.createElement("input"); // where user can input text for custom sticker
+userInput.type = "text";
+userInput.placeholder = "Custom sticker here...";
+
+const customButton = document.createElement("button"); // button to click to make the new sticker
+customButton.type = "button";
+customButton.textContent = "Create a Sticker!";
 
 //the drawing command is anything that knows how to draw itself onto a canvas
 type DrawCommand = {
@@ -60,8 +69,8 @@ function makeStickerCommand(x: number, y: number, emoji: string): DrawCommand {
   return {
     display(ctx) {
       ctx.font = "32px serif";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
+      ctx.textAlign = "center"; // these two lines make it so that the sticker is in the middle of the click
+      ctx.textBaseline = "middle"; // ^^^^
       ctx.fillText(emoji, x, y);
     },
   };
@@ -94,13 +103,13 @@ const markerTools: MarkerTool[] = [
   { name: "Thick", lineWidth: 6 },
 ];
 
-let selectedTool: MarkerTool | StickerTool = markerTools[0];
+let selectedTool: MarkerTool | StickerTool = markerTools[0]; // tool can be marker or sticker
 const toolButtons: HTMLButtonElement[] = [];
 
 //make the selecte tools buttons BOLDD
 function updateToolButtons() {
   for (let i = 0; i < toolButtons.length; i++) {
-    if (toolButtons[i].textContent.includes(selectedTool.name)) {
+    if (toolButtons[i].textContent?.includes(selectedTool.name)) { // if the tool has the selected tool name in it
       toolButtons[i].style.fontWeight = "bold";
     } else {
       toolButtons[i].style.fontWeight = "normal";
@@ -119,9 +128,8 @@ for (const tool of markerTools) {
   });
   toolButtons.push(button);
 }
-updateToolButtons();
 
-for (const sticker of stickerTools) {
+for (const sticker of stickerTools) { // goes through each sticker and makes a button for them
   const button = document.createElement("button");
   button.type = "button";
   button.textContent = sticker.emoji + sticker.name;
@@ -131,6 +139,8 @@ for (const sticker of stickerTools) {
   });
   toolButtons.push(button);
 }
+updateToolButtons();
+
 function redraw() {
   if (ctx !== null) { // makes sure ctx loaded
     ctx.clearRect(0, 0, canvas.width, canvas.height); // clears the canvas for a clean slate
@@ -213,6 +223,30 @@ redoButton.addEventListener("click", () => {
   }
 });
 
+customButton.addEventListener("click", () => {
+  if (userInput.value.length === 0) { // make sure the user puts something in
+    alert("Enter a valid character or word!");
+    return;
+  }
+  const newSticker: StickerTool = { // make a new sticker
+    name: "Custom",
+    emoji: userInput.value,
+  };
+  stickerTools.push(newSticker);
+  const newButton = document.createElement("button"); // button for the new sticker
+  newButton.type = "button";
+  newButton.textContent = newSticker.emoji;
+  newButton.addEventListener("click", () => {
+    selectedTool = newSticker;
+    updateToolButtons();
+  });
+  toolButtons.push(newButton);
+  app.appendChild(newButton);
+  selectedTool = newSticker;
+  updateToolButtons();
+  userInput.value = ""; // after the user makes their button clear the text so they can make a new one again
+});
+
 //step 3: redraw button
 const redrawButton = document.createElement("button");
 redrawButton.textContent = "Redraw";
@@ -231,6 +265,8 @@ app.append(
   redoButton,
   redrawButton,
   ...toolButtons,
+  userInput,
+  customButton,
 );
 
 redraw(); //the starting state of the undo and redo button
