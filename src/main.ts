@@ -27,16 +27,38 @@ redoButton.type = "button";
 type Point = { x: number; y: number };
 type Stroke = { points: Point[]; lineWidth: number };
 
+//the drawing command is anything that knows how to draw itself onto a canvas
+type DrawCommand = {
+  display(ctx: CanvasRenderingContext2D): void;
+};
+
+//wraps a finished stroke so it can draw itself
+function makeStrokeCommand(stroke: Stroke): DrawCommand {
+  return {
+    display(ctx) {
+      ctx.save(); //keeps stroke setting leaking into other commands
+      ctx.beginPath();
+      ctx.lineWidth = stroke.lineWidth;
+      ctx.moveTo(stroke.points[0].x, stroke.points[0].y);
+      for (let i = 1; i < stroke.points.length; i++) {
+        ctx.lineTo(stroke.points[i].x, stroke.points[i].y);
+      }
+      ctx.stroke();
+      ctx.restore();
+    },
+  };
+}
+
 //all of the finishes strokes in order they were drawn
-const strokes: Stroke[] = [];
-const redoStrokes: Stroke[] = [];
+const strokes: DrawCommand[] = [];
+const redoStrokes: DrawCommand[] = [];
 //current stroke (duh) but its null when nothing is being drawn
 let currentStroke: Stroke | null = null;
 
 function finishStroke() {
   //only keeps the strokes that have min 2 points
   if (currentStroke != null && currentStroke.points.length >= 2) {
-    strokes.push(currentStroke);
+    strokes.push(makeStrokeCommand(currentStroke));
     redoStrokes.length = 0;
   }
   currentStroke = null;
@@ -85,14 +107,8 @@ function redraw() {
   if (ctx !== null) { // makes sure ctx loaded
     ctx.clearRect(0, 0, canvas.width, canvas.height); // clears the canvas for a clean slate
     // Holds the other lines
-    for (const stroke of strokes) { // for each stroke
-      ctx.beginPath(); // start the path and set the thickness
-      ctx.lineWidth = stroke.lineWidth;
-      ctx.moveTo(stroke.points[0].x, stroke.points[0].y);
-      for (let i = 1; i < stroke.points.length; i++) { // where the line will be drawn
-        ctx.lineTo(stroke.points[i].x, stroke.points[i].y);
-      }
-      ctx.stroke(); // draws the line
+    for (const command of strokes) {
+      command.display(ctx);
     }
     // current line
     if (currentStroke !== null) { // if there is a drawing occuring
