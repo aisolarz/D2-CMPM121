@@ -106,10 +106,30 @@ const markerTools: MarkerTool[] = [
 let selectedTool: MarkerTool | StickerTool = markerTools[0]; // tool can be marker or sticker
 const toolButtons: HTMLButtonElement[] = [];
 
+//toolsForButtons[i] is the tool that toolButtons[i] selects
+const toolsForButtons: (MarkerTool | StickerTool)[] = [];
+
+//one function that builds a button for ANY tool
+function addToolButton(
+  tool: MarkerTool | StickerTool,
+  label: string,
+): HTMLButtonElement {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.textContent = label;
+  button.addEventListener("click", () => {
+    selectedTool = tool; //only changed the selection. not doc or history
+    updateToolButtons();
+  });
+  toolButtons.push(button);
+  toolsForButtons.push(tool);
+  return button;
+}
+
 //make the selecte tools buttons BOLDD
 function updateToolButtons() {
   for (let i = 0; i < toolButtons.length; i++) {
-    if (toolButtons[i].textContent?.includes(selectedTool.name)) { // if the tool has the selected tool name in it
+    if (toolsForButtons[i] === selectedTool) { // is this buttons tool the selected one
       toolButtons[i].style.fontWeight = "bold";
     } else {
       toolButtons[i].style.fontWeight = "normal";
@@ -117,27 +137,13 @@ function updateToolButtons() {
   }
 }
 
-//buillds a button for every tool in the list
+//builds a button for every marker tool
 for (const tool of markerTools) {
-  const button = document.createElement("button");
-  button.type = "button";
-  button.textContent = tool.name;
-  button.addEventListener("click", () => {
-    selectedTool = tool; //only changes what it selects and not the history/document
-    updateToolButtons();
-  });
-  toolButtons.push(button);
+  addToolButton(tool, tool.name);
 }
 
-for (const sticker of stickerTools) { // goes through each sticker and makes a button for them
-  const button = document.createElement("button");
-  button.type = "button";
-  button.textContent = sticker.emoji + sticker.name;
-  button.addEventListener("click", () => {
-    selectedTool = sticker;
-    updateToolButtons();
-  });
-  toolButtons.push(button);
+for (const sticker of stickerTools) { // builds a button for every preset sticker
+  addToolButton(sticker, sticker.emoji + sticker.name);
 }
 updateToolButtons();
 
