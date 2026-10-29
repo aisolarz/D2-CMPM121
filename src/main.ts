@@ -230,27 +230,21 @@ redoButton.addEventListener("click", () => {
 });
 
 customButton.addEventListener("click", () => {
-  if (userInput.value.length === 0) { // make sure the user puts something in
+  const text = userInput.value.trim(); // trim() removes spaces, so "   " counts as empty
+  if (text.length === 0) { // make sure the user puts something in
     alert("Enter a valid character or word!");
-    return;
+    return; // nothing is added, so no broken tool and no history change
   }
-  const newSticker: StickerTool = { // make a new sticker
-    name: "Custom",
-    emoji: userInput.value,
-  };
+  const newSticker: StickerTool = { name: "Custom", emoji: text };
   stickerTools.push(newSticker);
-  const newButton = document.createElement("button"); // button for the new sticker
-  newButton.type = "button";
-  newButton.textContent = newSticker.emoji;
-  newButton.addEventListener("click", () => {
-    selectedTool = newSticker;
-    updateToolButtons();
-  });
-  toolButtons.push(newButton);
-  app.appendChild(newButton);
+
+  // the same function the preset buttons use
+  const newButton = addToolButton(newSticker, newSticker.emoji);
+  app.insertBefore(newButton, userInput); // put it with the other tool buttons
+
   selectedTool = newSticker;
   updateToolButtons();
-  userInput.value = ""; // after the user makes their button clear the text so they can make a new one again
+  userInput.value = ""; // clear the box so they can make another one
 });
 
 //step 3: redraw button
