@@ -1,0 +1,68 @@
+/* background*/
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: linear-gradient(
+    135deg,
+    #ebc6cf,
+    #f2e1c7,
+    #fcf8c2,
+    #c5edc5,
+    #c4e2f7,
+    #d5c3f0
+  );
+  background-attachment: fixed;
+  color: #5b4b6b;
+  font-family: "Trebuchet MS", system-ui, sans-serif;
+}
+
+#app {
+  padding: 20px;
+}
+
+/* rainbowwww title*/
+h1 {
+  font-size: 3rem;
+  background: linear-gradient(
+    360deg,
+    #e0556b,
+    #e8892a,
+    #c9a800,
+    #3fa34d,
+    #2b8fd6,
+    #7a4fd6
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/*the canvas*/
+canvas {
+  background: white;
+  border: 6px solid #ffb6c9
+    !important; /* !important beats the border set in the TypeScript file */
+  border-radius: 20px;
+  box-shadow: 0 6px 16px rgba(150, 120, 180, 0.3);
+  cursor: crosshair;
+}
+
+/*buttons*/
+button {
+  margin: 4px;
+  padding: 8px 14px;
+  border: 3px solid white;
+  border-radius: 999px;
+  font-size: 1rem;
+  color: #5b4b6b;
+  cursor: pointer;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+}
+
+/*the custom sticker box*/
+input {
+  padding: 8px 14px;
+  border: 3px solid #bae1ff;
+  border-radius: 999px;
+  font-size: 1rem;
+}
