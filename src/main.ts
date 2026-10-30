@@ -17,6 +17,7 @@ const ctx = canvas.getContext("2d");
 // declare the button rows at the top to append later at the bottom
 const buttonRow = document.createElement("div");
 const toolRow = document.createElement("div");
+
 // ============= Buttons ==========================
 const undoButton = document.createElement("button");
 undoButton.textContent = "Undo";
@@ -160,22 +161,22 @@ function refreshToolbar() {
 }
 refreshToolbar();
 
-function redraw() {
-  if (ctx !== null) { // makes sure ctx loaded
-    ctx.clearRect(0, 0, canvas.width, canvas.height); // clears the canvas for a clean slate
+function redraw(target: CanvasRenderingContext2D) { // now can be used on any ctx instead of just the canvas (needed for step 8)
+  if (target !== null) { // makes sure ctx loaded
+    target.clearRect(0, 0, canvas.width, canvas.height); // clears the canvas for a clean slate
     // Holds the other lines
     for (const command of strokes) {
-      command.display(ctx);
+      command.display(target);
     }
     // current line
     if (currentStroke !== null) { // if there is a drawing occuring
-      ctx.beginPath(); // start the path and set the thickness
-      ctx.lineWidth = currentStroke.lineWidth;
-      ctx.moveTo(currentStroke.points[0].x, currentStroke.points[0].y);
+      target.beginPath(); // start the path and set the thickness
+      target.lineWidth = currentStroke.lineWidth;
+      target.moveTo(currentStroke.points[0].x, currentStroke.points[0].y);
       for (let i = 1; i < currentStroke.points.length; i++) { // path for the pen
-        ctx.lineTo(currentStroke.points[i].x, currentStroke.points[i].y);
+        target.lineTo(currentStroke.points[i].x, currentStroke.points[i].y);
       }
-      ctx.stroke(); // draws the line
+      target.stroke(); // draws the line
     }
   }
   undoButton.disabled = strokes.length === 0;
@@ -199,29 +200,29 @@ canvas.addEventListener("pointerdown", (event) => {
     redoStrokes.length = 0;
   }
 
-  redraw();
+  redraw(ctx!);
 });
 
 canvas.addEventListener("pointermove", (event) => {
   if (currentStroke != null) {
     currentStroke.points.push({ x: event.offsetX, y: event.offsetY });
-    redraw();
+    redraw(ctx!);
   }
 });
 
 canvas.addEventListener("pointerup", () => {
   finishStroke();
-  redraw();
+  redraw(ctx!);
 });
 
 canvas.addEventListener("pointerleave", () => {
   finishStroke();
-  redraw();
+  redraw(ctx!);
 });
 
 canvas.addEventListener("pointercancel", () => {
   cancelStroke();
-  redraw();
+  redraw(ctx!);
 });
 // ============== Button Event Listeners ====================
 undoButton.addEventListener("click", () => {
@@ -229,7 +230,7 @@ undoButton.addEventListener("click", () => {
     const poppedStroke = strokes.pop();
     if (poppedStroke !== undefined) {
       redoStrokes.push(poppedStroke); // add them to the strokes we could potentially redo later
-      redraw();
+      redraw(ctx!);
     }
   }
 });
@@ -238,7 +239,7 @@ redoButton.addEventListener("click", () => {
     const poppedRedo = redoStrokes.pop();
     if (poppedRedo !== undefined) {
       strokes.push(poppedRedo); // add it to the strokes (put it back on the page)
-      redraw();
+      redraw(ctx!);
     }
   }
 });
@@ -263,7 +264,7 @@ clearButton.addEventListener("click", () => {
   ctx?.clearRect(0, 0, canvas.width, canvas.height);
   strokes.length = 0;
   redoStrokes.length = 0;
-  redraw();
+  redraw(ctx!);
 });
 //step 3: redraw button
 const redrawButton = document.createElement("button");
@@ -272,7 +273,7 @@ redrawButton.type = "button";
 redrawButton.addEventListener("click", () => {
   //has to clear the pixels not the strokes
   ctx?.clearRect(0, 0, canvas.width, canvas.height);
-  redraw();
+  redraw(ctx!);
 });
 // Row for undo, redo, redraw
 buttonRow.append(undoButton, redoButton, clearButton, redrawButton);
@@ -287,4 +288,4 @@ app.append(
   toolRow,
 );
 
-redraw(); //the starting state of the undo and redo button
+redraw(ctx!); //the starting state of the undo and redo button
