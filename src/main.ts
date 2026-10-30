@@ -31,6 +31,10 @@ const clearButton = document.createElement("button");
 clearButton.textContent = "Clear";
 clearButton.type = "button";
 
+const exportButton = document.createElement("button");
+exportButton.textContent = "Export";
+exportButton.type = "button";
+
 //step 2: document data
 type Point = { x: number; y: number };
 type Stroke = { points: Point[]; lineWidth: number };
@@ -150,16 +154,16 @@ function refreshToolbar() {
   toolRow.innerHTML = ""; // clear the tool row
   toolButtons.length = 0;
   toolsForButtons.length = 0;
-  for (const marker of markerTools) {
+  for (const marker of markerTools) { // adds the tool buttons to the row
     toolRow.append(addToolButton(marker, marker.name));
   }
-  for (const sticker of stickerTools) {
+  for (const sticker of stickerTools) { // adds sticker buttons to the row
     toolRow.append(addToolButton(sticker, sticker.emoji + sticker.name));
   }
-  toolRow.append(userInput, customButton);
-  updateToolButtons();
+  toolRow.append(userInput, customButton); // adds the custom sticker stuff
+  updateToolButtons(); // takes care of button bolding
 }
-refreshToolbar();
+refreshToolbar(); // sets up the tool bar
 
 function redraw(target: CanvasRenderingContext2D) { // now can be used on any ctx instead of just the canvas (needed for step 8)
   if (target !== null) { // makes sure ctx loaded
@@ -179,6 +183,7 @@ function redraw(target: CanvasRenderingContext2D) { // now can be used on any ct
       target.stroke(); // draws the line
     }
   }
+  // controls when buttons should be disabled
   undoButton.disabled = strokes.length === 0;
   redoButton.disabled = redoStrokes.length === 0;
   clearButton.disabled = strokes.length === 0;
@@ -266,6 +271,25 @@ clearButton.addEventListener("click", () => {
   redoStrokes.length = 0;
   redraw(ctx!);
 });
+
+exportButton.addEventListener("click", () => {
+  const exportCanvas = document.createElement("canvas"); // offscreen canvas that will be exported
+  exportCanvas.width = canvas.width * 2; // make the canvas twice the size as the original
+  exportCanvas.height = canvas.height * 2;
+  const exportCtx = exportCanvas.getContext("2d");
+  exportCtx?.scale(2, 2); // matches the coordinates on the new canvas
+  redraw(exportCtx!);
+  exportCanvas.toBlob((blob) => { // handles download
+    if (blob !== null) {
+      const newImg = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+      newImg.href = url;
+      newImg.download = "my-drawing.png";
+      newImg.click();
+    }
+  });
+});
+
 //step 3: redraw button
 const redrawButton = document.createElement("button");
 redrawButton.textContent = "Redraw";
@@ -275,8 +299,16 @@ redrawButton.addEventListener("click", () => {
   ctx?.clearRect(0, 0, canvas.width, canvas.height);
   redraw(ctx!);
 });
+
 // Row for undo, redo, redraw
-buttonRow.append(undoButton, redoButton, clearButton, redrawButton);
+buttonRow.append(
+  undoButton,
+  redoButton,
+  clearButton,
+  redrawButton,
+  exportButton,
+);
+
 // Row for tools and custom button
 toolRow.append(...toolButtons, userInput, customButton);
 
