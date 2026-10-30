@@ -23,6 +23,10 @@ const redoButton = document.createElement("button");
 redoButton.textContent = "Redo";
 redoButton.type = "button";
 
+const clearButton = document.createElement("button");
+clearButton.textContent = "Clear";
+clearButton.type = "button";
+
 //step 2: document data
 type Point = { x: number; y: number };
 type Stroke = { points: Point[]; lineWidth: number };
@@ -36,6 +40,7 @@ const stickerTools: StickerTool[] = [
   { name: "Awkward", emoji: "🫥" },
 ];
 
+// ====================== Buttons for Creating a Custom Button ===================================
 const userInput = document.createElement("input"); // where user can input text for custom sticker
 userInput.type = "text";
 userInput.placeholder = "Custom sticker here...";
@@ -68,7 +73,7 @@ function makeStrokeCommand(stroke: Stroke): DrawCommand {
 function makeStickerCommand(x: number, y: number, emoji: string): DrawCommand {
   return {
     display(ctx) {
-      ctx.font = "32px serif";
+      ctx.font = "32px cursive";
       ctx.textAlign = "center"; // these two lines make it so that the sticker is in the middle of the click
       ctx.textBaseline = "middle"; // ^^^^
       ctx.fillText(emoji, x, y);
@@ -167,6 +172,7 @@ function redraw() {
   }
   undoButton.disabled = strokes.length === 0;
   redoButton.disabled = redoStrokes.length === 0;
+  clearButton.disabled = strokes.length === 0;
 }
 // ============ Canvas Event Listeners =========
 canvas.addEventListener("pointerdown", (event) => {
@@ -247,6 +253,12 @@ customButton.addEventListener("click", () => {
   userInput.value = ""; // clear the box so they can make another one
 });
 
+clearButton.addEventListener("click", () => {
+  ctx?.clearRect(0, 0, canvas.width, canvas.height);
+  strokes.length = 0;
+  redoStrokes.length = 0;
+  redraw();
+});
 //step 3: redraw button
 const redrawButton = document.createElement("button");
 redrawButton.textContent = "Redraw";
@@ -258,7 +270,7 @@ redrawButton.addEventListener("click", () => {
 });
 // Row for undo, redo, redraw
 const buttonRow = document.createElement("div");
-buttonRow.append(undoButton, redoButton, redrawButton);
+buttonRow.append(undoButton, redoButton, clearButton, redrawButton);
 // Row for tools and custom button
 const toolRow = document.createElement("div");
 toolRow.append(...toolButtons, userInput, customButton);
