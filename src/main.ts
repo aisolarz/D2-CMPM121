@@ -14,6 +14,8 @@ canvas.style.border = "1px solid black";
 
 const ctx = canvas.getContext("2d");
 
+const buttonRow = document.createElement("div");
+const toolRow = document.createElement("div");
 // ============= Buttons ==========================
 const undoButton = document.createElement("button");
 undoButton.textContent = "Undo";
@@ -142,16 +144,20 @@ function updateToolButtons() {
   }
 }
 
-//builds a button for every marker tool
-for (const tool of markerTools) {
-  addToolButton(tool, tool.name);
+function refreshToolbar() {
+  toolRow.innerHTML = ""; // clear the tool row
+  toolButtons.length = 0;
+  toolsForButtons.length = 0;
+  for (const marker of markerTools) {
+    toolRow.append(addToolButton(marker, marker.name));
+  }
+  for (const sticker of stickerTools) {
+    toolRow.append(addToolButton(sticker, sticker.emoji + sticker.name));
+  }
+  toolRow.append(userInput, customButton);
+  updateToolButtons();
 }
-
-for (const sticker of stickerTools) { // builds a button for every preset sticker
-  addToolButton(sticker, sticker.emoji + sticker.name);
-}
-updateToolButtons();
-
+refreshToolbar();
 function redraw() {
   if (ctx !== null) { // makes sure ctx loaded
     ctx.clearRect(0, 0, canvas.width, canvas.height); // clears the canvas for a clean slate
@@ -241,15 +247,13 @@ customButton.addEventListener("click", () => {
     alert("Enter a valid character or word!");
     return; // nothing is added, so no broken tool and no history change
   }
-  const newSticker: StickerTool = { name: "Custom", emoji: text };
+  const newSticker: StickerTool = { name: "", emoji: text };
   stickerTools.push(newSticker);
 
   // the same function the preset buttons use
-  const newButton = addToolButton(newSticker, newSticker.emoji);
-  toolRow.insertBefore(newButton, userInput); // put it with the other tool buttons
 
   selectedTool = newSticker;
-  updateToolButtons();
+  refreshToolbar();
   userInput.value = ""; // clear the box so they can make another one
 });
 
@@ -269,10 +273,8 @@ redrawButton.addEventListener("click", () => {
   redraw();
 });
 // Row for undo, redo, redraw
-const buttonRow = document.createElement("div");
 buttonRow.append(undoButton, redoButton, clearButton, redrawButton);
 // Row for tools and custom button
-const toolRow = document.createElement("div");
 toolRow.append(...toolButtons, userInput, customButton);
 
 app.append(
