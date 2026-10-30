@@ -14,6 +14,7 @@ canvas.style.border = "1px solid black";
 
 const ctx = canvas.getContext("2d");
 
+// declare the button rows at the top to append later at the bottom
 const buttonRow = document.createElement("div");
 const toolRow = document.createElement("div");
 // ============= Buttons ==========================
@@ -158,6 +159,7 @@ function refreshToolbar() {
   updateToolButtons();
 }
 refreshToolbar();
+
 function redraw() {
   if (ctx !== null) { // makes sure ctx loaded
     ctx.clearRect(0, 0, canvas.width, canvas.height); // clears the canvas for a clean slate
