@@ -240,7 +240,7 @@ customButton.addEventListener("click", () => {
 
   // the same function the preset buttons use
   const newButton = addToolButton(newSticker, newSticker.emoji);
-  app.insertBefore(newButton, userInput); // put it with the other tool buttons
+  toolRow.insertBefore(newButton, userInput); // put it with the other tool buttons
 
   selectedTool = newSticker;
   updateToolButtons();
@@ -256,17 +256,19 @@ redrawButton.addEventListener("click", () => {
   ctx?.clearRect(0, 0, canvas.width, canvas.height);
   redraw();
 });
+// Row for undo, redo, redraw
+const buttonRow = document.createElement("div");
+buttonRow.append(undoButton, redoButton, redrawButton);
+// Row for tools and custom button
+const toolRow = document.createElement("div");
+toolRow.append(...toolButtons, userInput, customButton);
 
 app.append(
   heading,
   message,
   canvas,
-  undoButton,
-  redoButton,
-  redrawButton,
-  ...toolButtons,
-  userInput,
-  customButton,
+  buttonRow,
+  toolRow,
 );
 
 redraw(); //the starting state of the undo and redo button
