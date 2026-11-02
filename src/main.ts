@@ -277,8 +277,20 @@ exportButton.addEventListener("click", () => {
   exportCanvas.width = canvas.width * 2; // make the canvas twice the size as the original
   exportCanvas.height = canvas.height * 2;
   const exportCtx = exportCanvas.getContext("2d");
-  exportCtx?.scale(2, 2); // matches the coordinates on the new canvas
-  redraw(exportCtx!);
+  if (exportCtx === null) {
+    return; //cant export without drawing
+  }
+  exportCtx.scale(2, 2); //matches the cords on new canvas
+  exportCtx.save();
+  exportCtx.fillStyle = "white";
+  exportCtx.fillRect(0, 0, canvas.width, canvas.height);
+  exportCtx.restore();
+
+  //replay only the finished commands
+  for (const command of strokes) {
+    command.display(exportCtx);
+  }
+
   exportCanvas.toBlob((blob) => { // handles download
     if (blob !== null) {
       const newImg = document.createElement("a");
