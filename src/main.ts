@@ -81,10 +81,12 @@ function makeStrokeCommand(stroke: Stroke): DrawCommand {
 function makeStickerCommand(x: number, y: number, emoji: string): DrawCommand {
   return {
     display(ctx) {
+      ctx.save();
       ctx.font = "32px cursive";
       ctx.textAlign = "center"; // these two lines make it so that the sticker is in the middle of the click
       ctx.textBaseline = "middle"; // ^^^^
       ctx.fillText(emoji, x, y);
+      ctx.restore();
     },
   };
 }
