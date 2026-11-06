@@ -30,6 +30,7 @@ redoButton.type = "button";
 const clearButton = document.createElement("button");
 clearButton.textContent = "Clear";
 clearButton.type = "button";
+clearButton.title = "Clears the whole drawing. This cannot be undone.";
 
 const exportButton = document.createElement("button");
 exportButton.textContent = "Export";
@@ -69,6 +70,8 @@ function makeStrokeCommand(stroke: Stroke): DrawCommand {
       ctx.save(); //keeps stroke setting leaking into other commands
       ctx.beginPath();
       ctx.lineWidth = stroke.lineWidth;
+      ctx.lineCap = "round"; // rounded line ends
+      ctx.lineJoin = "round"; // rounded corners
       ctx.moveTo(stroke.points[0].x, stroke.points[0].y);
       for (let i = 1; i < stroke.points.length; i++) {
         ctx.lineTo(stroke.points[i].x, stroke.points[i].y);
@@ -174,15 +177,9 @@ function redraw(target: CanvasRenderingContext2D) { // now can be used on any ct
     for (const command of strokes) {
       command.display(target);
     }
-    // current line
-    if (currentStroke !== null) { // if there is a drawing occuring
-      target.beginPath(); // start the path and set the thickness
-      target.lineWidth = currentStroke.lineWidth;
-      target.moveTo(currentStroke.points[0].x, currentStroke.points[0].y);
-      for (let i = 1; i < currentStroke.points.length; i++) { // path for the pen
-        target.lineTo(currentStroke.points[i].x, currentStroke.points[i].y);
-      }
-      target.stroke(); // draws the line
+    // current line (uses the same drawing code as finished strokes)
+    if (currentStroke !== null && currentStroke.points.length >= 2) {
+      makeStrokeCommand(currentStroke).display(target);
     }
   }
   // controls when buttons should be disabled
