@@ -52,7 +52,7 @@ const stickerTools: StickerTool[] = [
 // ====================== Buttons for Creating a Custom Button ===================================
 const userInput = document.createElement("input"); // where user can input text for custom sticker
 userInput.type = "text";
-userInput.placeholder = "Custom sticker here...";
+userInput.placeholder = "Text/Emoji sticker here...";
 
 const customButton = document.createElement("button"); // button to click to make the new sticker
 customButton.type = "button";
